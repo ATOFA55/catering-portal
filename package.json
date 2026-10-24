@@ -1,0 +1,16 @@
+{
+  "name": "cateringpro-portal",
+  "private": true,
+  "description": "CateringPro - full company portal for a catering company (NestJS + PostgreSQL + React)",
+  "scripts": {
+    "install:all": "npm install && npm --prefix apps/api install && npm --prefix apps/web install",
+    "db:reset": "npm --prefix apps/api run db:reset",
+    "dev:api": "npm --prefix apps/api run dev",
+    "dev:web": "npm --prefix apps/web run dev",
+    "test": "npm --prefix apps/api test",
+    "demo": "node e2e/demo-script.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.63.0"
+  }
+}
