@@ -16,7 +16,7 @@ import Executive from './pages/Executive';
 import Finance, { MyInvoices } from './pages/Finance';
 import Inventory from './pages/Inventory';
 import Kitchen from './pages/Kitchen';
-import Login, { ForgotPassword, ResetPassword } from './pages/Login';
+import Login, { ForgotPassword, Register, ResetPassword } from './pages/Login';
 import OrderBuilder from './pages/OrderBuilder';
 import OrderDetail from './pages/OrderDetail';
 import OrdersPage from './pages/Orders';
@@ -27,6 +27,7 @@ export default function App() {
   if (!me) {
     return (
       <Routes>
+        <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="*" element={<Login />} />

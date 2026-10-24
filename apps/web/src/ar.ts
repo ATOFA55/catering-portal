@@ -27,6 +27,9 @@ const ar: Record<string, string> = {
   'Reset your password': 'إعادة تعيين كلمة المرور', 'We will send a reset link to your email.': 'سنرسل رابط إعادة التعيين إلى بريدك.', 'Send reset link': 'إرسال الرابط', 'Back to sign in': 'العودة لتسجيل الدخول',
   '(Prototype: the link is printed in the API server log.)': '(نموذج أولي: يظهر الرابط في سجل الخادم.)', 'Choose a new password': 'اختر كلمة مرور جديدة', 'New password': 'كلمة المرور الجديدة',
   'At least 8 characters': '8 أحرف على الأقل', 'Save password': 'حفظ كلمة المرور',
+  'New here?': 'جديد هنا؟', 'Create a customer account': 'إنشاء حساب عميل', 'Create your account': 'إنشاء حسابك',
+  'Register as a customer to browse the catalog and place orders.': 'سجّل كعميل لتصفح الكتالوج وتقديم الطلبات.',
+  'Optional': 'اختياري', 'Create account': 'إنشاء الحساب', 'Already have an account? Sign in': 'لديك حساب؟ تسجيل الدخول',
   // common
   'Loading...': 'جارٍ التحميل...', 'Access denied': 'تم رفض الوصول', 'Your role does not allow this page.': 'دورك لا يسمح بفتح هذه الصفحة.',
   'The server refused the request and recorded the attempt in the audit log.': 'رفض الخادم الطلب وسجّل المحاولة في سجل التدقيق.', 'Back to my dashboard': 'العودة إلى لوحتي',

@@ -8,9 +8,12 @@ export interface Me {
   permissions: Record<string, Scope>;
 }
 
+export interface RegisterInput { name: string; email: string; password: string; phone?: string; company?: string; }
+
 interface AuthCtx {
   me: Me | null; loading: boolean;
   login: (email: string, password: string) => Promise<Me>;
+  register: (input: RegisterInput) => Promise<Me>;
   logout: () => void;
   can: (...perms: string[]) => boolean;
   scope: (perm: string) => Scope | undefined;
@@ -35,9 +38,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setMe(r.user);
     return r.user;
   };
+  const register = async (input: RegisterInput) => {
+    const r = await post<{ token: string; user: Me }>('/auth/register', input);
+    setToken(r.token);
+    setMe(r.user);
+    return r.user;
+  };
   const can = (...perms: string[]) => !!me && perms.some((p) => p in me.permissions);
   const scope = (perm: string) => me?.permissions[perm];
-  return <Ctx.Provider value={{ me, loading, login, logout, can, scope }}>{children}</Ctx.Provider>;
+  return <Ctx.Provider value={{ me, loading, login, register, logout, can, scope }}>{children}</Ctx.Provider>;
 }
 
 export const useAuth = () => useContext(Ctx);

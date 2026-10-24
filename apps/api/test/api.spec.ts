@@ -40,6 +40,14 @@ describe('Authentication and RBAC (UC-05, FR-31 to FR-34, NFR-09)', () => {
     await http().post('/api/auth/login').send({ email: 'driver3@cateringpro.demo', password: 'Demo@123' }).expect(423);
   });
 
+  it('lets a new user self-register, always as a Customer, and logs them in', async () => {
+    const r = await http().post('/api/auth/register').send({ name: 'New Guest', email: 'newguest@cateringpro.demo', password: 'Demo@123' }).expect(201);
+    expect(r.body.token).toBeTruthy();
+    expect(r.body.user.role.code).toBe('CUSTOMER');
+    expect(r.body.user.isSuperAdmin).toBe(false);
+    await http().post('/api/auth/register').send({ name: 'Dup', email: 'newguest@cateringpro.demo', password: 'Demo@123' }).expect(400);
+  });
+
   it('refuses requests without a token', () => http().get('/api/orders').expect(401));
 
   it('refuses a driver calling the finance API directly, and records it in the audit log', async () => {

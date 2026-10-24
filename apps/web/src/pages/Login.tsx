@@ -1,9 +1,9 @@
 import { ChefHat, ClipboardList, Gauge, Loader2, ShieldCheck, Truck } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useNavigate } from 'react-router-dom';
 import { post } from '../api';
-import { useAuth } from '../auth';
+import { RegisterInput, useAuth } from '../auth';
 import { ErrorBox, Field } from '../components/ui';
 
 const DEMO = [
@@ -67,6 +67,9 @@ export default function Login() {
             <button className="btn-primary w-full" disabled={busy}>{busy && <Loader2 size={16} className="animate-spin" />}{t('Sign in')}</button>
             <Link to="/forgot-password" className="block text-center text-xs text-brand-600 font-semibold mt-3">{t('Forgot your password?')}</Link>
           </form>
+          <p className="text-center text-sm text-ink-3 mt-4">
+            {t('New here?')} <Link to="/register" className="text-brand-600 font-semibold">{t('Create a customer account')}</Link>
+          </p>
 
           <div className="mt-7">
             <div className="text-xs font-bold text-ink-3 uppercase tracking-wide mb-2">{t('Demo accounts')} <span className="normal-case font-normal text-ink-4">· {t('password')} Demo@123</span></div>
@@ -118,6 +121,44 @@ export function ResetPassword() {
         {!!err && <div className="mb-3"><ErrorBox error={err} /></div>}
         <button className="btn-primary w-full">{t('Save password')}</button>
         <Link to="/login" className="block text-center text-xs text-brand-600 font-semibold mt-3">{t('Back to sign in')}</Link>
+      </form>
+    </div>
+  );
+}
+
+export function Register() {
+  const { t } = useTranslation();
+  const { register } = useAuth();
+  const nav = useNavigate();
+  const [form, setForm] = useState<RegisterInput>({ name: '', email: '', password: '', phone: '', company: '' });
+  const [busy, setBusy] = useState(false);
+  const [err, setErr] = useState<unknown>(null);
+  const set = (k: keyof RegisterInput) => (e: ChangeEvent<HTMLInputElement>) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const submit = async (e: FormEvent) => {
+    e.preventDefault();
+    setBusy(true); setErr(null);
+    try {
+      const me = await register({ ...form, phone: form.phone || undefined, company: form.company || undefined });
+      nav(me.role.homePath, { replace: true });
+    } catch (x) { setErr(x); } finally { setBusy(false); }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-6">
+      <form onSubmit={submit} className="card p-6 w-full max-w-sm">
+        <h1 className="text-lg font-bold mb-1">{t('Create your account')}</h1>
+        <p className="text-sm text-ink-3 mb-4">{t('Register as a customer to browse the catalog and place orders.')}</p>
+        <Field label={t('Full name')}><input className="input" value={form.name} onChange={set('name')} required minLength={2} /></Field>
+        <Field label={t('Email')}><input className="input" type="email" autoComplete="username" value={form.email} onChange={set('email')} required /></Field>
+        <Field label={t('Password')} hint={t('At least 8 characters')}>
+          <input className="input" type="password" autoComplete="new-password" minLength={8} value={form.password} onChange={set('password')} required />
+        </Field>
+        <Field label={t('Phone')} hint={t('Optional')}><input className="input" value={form.phone} onChange={set('phone')} /></Field>
+        <Field label={t('Company')} hint={t('Optional')}><input className="input" value={form.company} onChange={set('company')} /></Field>
+        {!!err && <div className="mb-3"><ErrorBox error={err} /></div>}
+        <button className="btn-primary w-full" disabled={busy}>{busy && <Loader2 size={16} className="animate-spin" />}{t('Create account')}</button>
+        <Link to="/login" className="block text-center text-xs text-brand-600 font-semibold mt-3">{t('Already have an account? Sign in')}</Link>
       </form>
     </div>
   );

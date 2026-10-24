@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, HttpException, HttpStatus, Inject, Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
 import { eq } from 'drizzle-orm';
@@ -6,7 +6,7 @@ import { AccessService } from '../common/access.service';
 import { AuditService } from '../common/audit.service';
 import { AuthUser } from '../common/auth.types';
 import { DB, Db } from '../db/db.module';
-import { users } from '../db/schema';
+import { roles, users } from '../db/schema';
 
 const MAX_FAILED = 5;
 const LOCK_MINUTES = 15;
@@ -41,6 +41,25 @@ export class AuthService {
     }
     await this.db.update(users).set({ failedLogins: 0, lockedUntil: null }).where(eq(users.id, user.id));
     await this.audit.log(user.id, 'LOGIN', email, 'SUCCESS', null, ip);
+    const auth = await this.access.load(user.id);
+    const token = await this.jwt.signAsync({ sub: user.id });
+    return { token, user: this.profile(auth!) };
+  }
+
+  /** Public self-registration: anyone can create an account, always as a Customer (BR-14 reserves other
+   * roles for Super Admin-created staff accounts). Logs the new user in immediately, same as login(). */
+  async register(body: { name: string; email: string; password: string; phone?: string; company?: string }, ip?: string) {
+    const email = body.email.trim().toLowerCase();
+    if ((await this.db.select().from(users).where(eq(users.email, email))).length) {
+      throw new BadRequestException('This email is already registered. Try signing in instead.');
+    }
+    const [role] = await this.db.select().from(roles).where(eq(roles.code, 'CUSTOMER'));
+    if (!role) throw new BadRequestException('Registration is not available right now');
+    const [user] = await this.db.insert(users).values({
+      name: body.name.trim(), email, passwordHash: await bcrypt.hash(body.password, 10),
+      roleId: role.id, phone: body.phone?.trim() || null, company: body.company?.trim() || null,
+    }).returning({ id: users.id });
+    await this.audit.log(user.id, 'USER_REGISTER', email, 'SUCCESS', { role: role.code }, ip);
     const auth = await this.access.load(user.id);
     const token = await this.jwt.signAsync({ sub: user.id });
     return { token, user: this.profile(auth!) };
